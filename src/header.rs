@@ -12,7 +12,8 @@ pub struct Header {
     /// Version of the file
     pub version: u16,
     pub unk_1: u32, // Seems to always be 4
-    pub unk_2: u32, // Proportional to the file size, looks like an offset...
+    /// Absolute offset to the beginning of the compressed data inside the GARC file
+    pub data_offset: u32,
     /// Total size of this file, should be the same as the size of the file where this is read from
     pub file_size: u32,
     pub unk_3: u32,         // Proportional to the file size
@@ -30,7 +31,7 @@ impl Header {
         let endianness = reader.read_le_to_u16()?;
         let version = reader.read_le_to_u16()?;
         let unk_1 = reader.read_le_to_u32()?;
-        let unk_2 = reader.read_le_to_u32()?;
+        let data_offset = reader.read_le_to_u32()?;
         let file_size = reader.read_le_to_u32()?;
         let unk_3 = reader.read_le_to_u32()?;
         let unk_4 = if header_size >= 36 {
@@ -52,7 +53,7 @@ impl Header {
             endianness,
             version,
             unk_1,
-            unk_2,
+            data_offset,
             file_size,
             unk_3,
             unk_4,
@@ -72,7 +73,7 @@ impl Header {
         writer.write_le_to_u16(self.endianness)?;
         writer.write_le_to_u16(self.version)?;
         writer.write_le_to_u32(self.unk_1)?;
-        writer.write_le_to_u32(self.unk_2)?;
+        writer.write_le_to_u32(self.data_offset)?;
         writer.write_le_to_u32(self.file_size)?;
         writer.write_le_to_u32(self.unk_3)?;
         if let Some(v) = self.unk_4 {
