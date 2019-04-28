@@ -5,6 +5,8 @@ use std::io::Error as IOError;
 pub enum GARCError {
     IO(IOError),
     MagicNumber(WrongMagicNumber),
+    HeaderTooSmall(u32),
+    HeaderDataMismatch,
 }
 
 impl From<IOError> for GARCError {
