@@ -19,14 +19,14 @@ pub struct GARC {
 impl GARC {
     /// Reads an entire GARC file to memory
     pub fn import<R: Read + Seek>(reader: &mut R) -> Result<GARC> {
-        reader.check_magic_number(&vec![b'C', b'R', b'A', b'G'])?;
+        reader.check_magic_number(&[b'C', b'R', b'A', b'G'])?;
         let header = Header::import(reader)?;
         Ok(GARC { header })
     }
 
     /// Exports an entire GARC file from memory
     pub fn export<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writer.write_all(&vec![b'C', b'R', b'A', b'G'])?;
+        writer.write_all(&[b'C', b'R', b'A', b'G'])?;
         self.header.export(writer)?;
         Ok(())
     }
