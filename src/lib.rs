@@ -62,13 +62,6 @@ impl GARC {
         writer: &mut W,
         file_index: usize,
     ) -> Result<()> {
-        // Check if the number of files is the same in FATO and FATB sections
-        if u32::from(self.fato.nb_entries) != self.fatb.nb_entries {
-            return Err(GARCError::NbEntriesMismatch(
-                self.fato.nb_entries,
-                self.fatb.nb_entries,
-            ));
-        }
         // Get the FATB entry
         let fatb_entry = match self.fatb.entries.get(file_index) {
             Some(o) => o,
@@ -89,5 +82,17 @@ impl GARC {
         // Decompress the file
         decompress(reader, writer, c_header.get_decompressed_size() as usize)?;
         Ok(())
+    }
+
+    pub fn get_nb_files(&self) -> Result<u32> {
+        // Check if the number of files is the same in FATO and FATB sections
+        if u32::from(self.fato.nb_entries) != self.fatb.nb_entries {
+            Err(GARCError::NbEntriesMismatch(
+                self.fato.nb_entries,
+                self.fatb.nb_entries,
+            ))
+        } else {
+            Ok(self.fatb.nb_entries)
+        }
     }
 }

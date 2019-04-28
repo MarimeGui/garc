@@ -36,7 +36,15 @@ fn main() {
     }
     create_dir_all(output_path).unwrap();
 
-    let garc = GARC::import(&mut BufReader::new(File::open(input_path).unwrap())).unwrap();
+    let garc_reader = &mut BufReader::new(File::open(input_path).unwrap());
 
-    println!("Extracting {} files", garc.fatb.nb_entries);
+    let garc = GARC::import(garc_reader).unwrap();
+
+    let nb_files = garc.get_nb_files().unwrap();
+    println!("Extracting {} files", nb_files);
+
+    for i in 0..nb_files {
+        let file_writer = &mut File::create(output_path.join(format!("dec_{}.bin", i))).unwrap();
+        garc.extract(garc_reader, file_writer, i as usize).unwrap();
+    }
 }
