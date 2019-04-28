@@ -14,7 +14,7 @@ use std::io::{Read, Seek, Write};
 
 type Result<T> = ::std::result::Result<T, GARCError>;
 
-/// Main type used in this crate. This Struct allows for easy Import / Export of GARC files.
+/// Main type used in this crate. This Struct allows for easy Import / Export of GARC files. This contains the data necessary for extracting the files, but it does not contain directly the binary data of the files.
 pub struct GARC {
     /// Header containing general information about the file
     pub header: Header,
