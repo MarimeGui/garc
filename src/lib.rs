@@ -4,10 +4,12 @@ pub mod error;
 pub mod fatb;
 pub mod fato;
 pub mod header;
+pub mod fimb;
 
 use crate::error::GARCError;
 use crate::fatb::FATB;
 use crate::fato::FATO;
+use crate::fimb::FIMB;
 use crate::header::Header;
 use ez_io::MagicNumberCheck;
 use std::io::{Read, Seek, Write};
@@ -20,6 +22,7 @@ pub struct GARC {
     pub header: Header,
     pub fato: FATO,
     pub fatb: FATB,
+    pub fimb: FIMB,
 }
 
 impl GARC {
@@ -29,7 +32,8 @@ impl GARC {
         let header = Header::import(reader)?;
         let fato = FATO::import(reader)?;
         let fatb = FATB::import(reader)?;
-        Ok(GARC { header, fato, fatb })
+        let fimb = FIMB::import(reader)?;
+        Ok(GARC { header, fato, fatb, fimb })
     }
 
     /// Exports an entire GARC file from memory
@@ -38,6 +42,7 @@ impl GARC {
         self.header.export(writer)?;
         self.fato.export(writer)?;
         self.fatb.export(writer)?;
+        self.fimb.export(writer)?;
         Ok(())
     }
 }
