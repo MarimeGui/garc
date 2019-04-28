@@ -75,8 +75,12 @@ impl Header {
         writer.write_le_to_u32(self.unk_2)?;
         writer.write_le_to_u32(self.file_size)?;
         writer.write_le_to_u32(self.unk_3)?;
-        if let Some(v) = self.unk_4 { writer.write_le_to_u32(v)? }
-        if let Some(v) = self.unk_5 { writer.write_le_to_u32(v)? }
+        if let Some(v) = self.unk_4 {
+            writer.write_le_to_u32(v)?
+        }
+        if let Some(v) = self.unk_5 {
+            writer.write_le_to_u32(v)?
+        }
         Ok(())
     }
 }
