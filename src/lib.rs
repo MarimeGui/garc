@@ -5,6 +5,7 @@ pub mod fatb;
 pub mod fato;
 pub mod header;
 pub mod fimb;
+pub mod lz11;
 
 use crate::error::GARCError;
 use crate::fatb::FATB;

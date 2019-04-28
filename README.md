@@ -5,4 +5,4 @@ This will (eventually) allow to decompress / compress GARC files found in Ninten
 Sources:
 
 * [GARCTool](https://github.com/kwsch/GARCTool)
-
+* [nlzss](https://github.com/magical/nlzss)
