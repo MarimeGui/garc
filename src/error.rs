@@ -9,6 +9,7 @@ pub enum GARCError {
     HeaderDataMismatch,
     NbEntriesMismatch(u16, u32),
     NoSuchIndex(usize),
+    UnknownCompressionAlgorithm(u8),
 }
 
 impl From<IOError> for GARCError {

@@ -8,6 +8,7 @@ pub mod fimb;
 pub mod header;
 pub mod lz11;
 
+use crate::compressed_header::CompressedHeader;
 use crate::error::GARCError;
 use crate::fatb::FATB;
 use crate::fato::FATO;
@@ -77,8 +78,16 @@ impl GARC {
         reader.seek(SeekFrom::Start(
             u64::from(self.header.data_offset) + u64::from(fatb_entry.start_offset),
         ))?;
+        // Get compressed header
+        let c_header = CompressedHeader::import(reader)?;
+        // Check compression type
+        if c_header.get_compression() != 0x11 {
+            return Err(GARCError::UnknownCompressionAlgorithm(
+                c_header.get_compression(),
+            ));
+        }
         // Decompress the file
-        // decompress(reader, writer, decompressed_size)?;
+        decompress(reader, writer, c_header.get_decompressed_size() as usize)?;
         Ok(())
     }
 }

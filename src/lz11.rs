@@ -3,7 +3,7 @@ use ez_io::ReadE;
 use std::io::{Read, Seek, SeekFrom, Write};
 
 fn bits(b: u8) -> [bool; 8] {
-    return [
+    [
         ((b >> 7) & 1) != 0,
         ((b >> 6) & 1) != 0,
         ((b >> 5) & 1) != 0,
@@ -12,7 +12,7 @@ fn bits(b: u8) -> [bool; 8] {
         ((b >> 2) & 1) != 0,
         ((b >> 1) & 1) != 0,
         (b & 1) != 0,
-    ];
+    ]
 }
 
 // Straight from https://github.com/magical/nlzss/blob/f27414f373eab53bfe3c1a819c40eb800323e690/lzss3.py#L72

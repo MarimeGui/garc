@@ -1,6 +1,5 @@
 use crate::Result;
-use ez_io::ReadE;
-use std::io::{Read, Write};
+use std::io::Read;
 
 pub struct CompressedHeader {
     pub raw: [u8; 4],
