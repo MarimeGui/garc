@@ -1,13 +1,26 @@
-use std::io::{Read, Write, Seek, SeekFrom};
-use ez_io::ReadE;
 use crate::Result;
+use ez_io::ReadE;
+use std::io::{Read, Seek, SeekFrom, Write};
 
 fn bits(b: u8) -> [bool; 8] {
-    return [((b >> 7) & 1) != 0, ((b >> 6) & 1) != 0, ((b >> 5) & 1) != 0, ((b >> 4) & 1) != 0, ((b >> 3) & 1) != 0, ((b >> 2) & 1) != 0, ((b >> 1) & 1) != 0, (b & 1) != 0];
+    return [
+        ((b >> 7) & 1) != 0,
+        ((b >> 6) & 1) != 0,
+        ((b >> 5) & 1) != 0,
+        ((b >> 4) & 1) != 0,
+        ((b >> 3) & 1) != 0,
+        ((b >> 2) & 1) != 0,
+        ((b >> 1) & 1) != 0,
+        (b & 1) != 0,
+    ];
 }
 
 // Straight from https://github.com/magical/nlzss/blob/f27414f373eab53bfe3c1a819c40eb800323e690/lzss3.py#L72
-pub fn decompress<R: Read, W: Read + Write + Seek>(reader: &mut R, writer: &mut W, decompressed_size: usize) -> Result<()> {
+pub fn decompress<R: Read, W: Read + Write + Seek>(
+    reader: &mut R,
+    writer: &mut W,
+    decompressed_size: usize,
+) -> Result<()> {
     let mut bytes_written = 0usize;
     let mut b;
     while bytes_written < decompressed_size {
@@ -43,7 +56,7 @@ pub fn decompress<R: Read, W: Read + Write + Seek>(reader: &mut R, writer: &mut 
 
                     writer.seek(SeekFrom::Current(-i64::from(disp)))?;
                     let to_write = writer.read_to_u8()?;
-                    writer.seek(SeekFrom::Current(i64::from(disp)-1))?;
+                    writer.seek(SeekFrom::Current(i64::from(disp) - 1))?;
 
                     let mut to_write_vec = Vec::with_capacity(count as usize);
                     for _ in 0..count {

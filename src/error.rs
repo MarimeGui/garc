@@ -7,6 +7,8 @@ pub enum GARCError {
     MagicNumber(WrongMagicNumber),
     HeaderTooSmall(u32),
     HeaderDataMismatch,
+    NbEntriesMismatch(u16, u32),
+    NoSuchIndex(usize),
 }
 
 impl From<IOError> for GARCError {

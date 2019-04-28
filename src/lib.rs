@@ -1,10 +1,11 @@
 extern crate ez_io;
 
+pub mod compressed_header;
 pub mod error;
 pub mod fatb;
 pub mod fato;
-pub mod header;
 pub mod fimb;
+pub mod header;
 pub mod lz11;
 
 use crate::error::GARCError;
@@ -12,8 +13,9 @@ use crate::fatb::FATB;
 use crate::fato::FATO;
 use crate::fimb::FIMB;
 use crate::header::Header;
+use crate::lz11::decompress;
 use ez_io::MagicNumberCheck;
-use std::io::{Read, Seek, Write};
+use std::io::{Read, Seek, SeekFrom, Write};
 
 type Result<T> = ::std::result::Result<T, GARCError>;
 
@@ -34,7 +36,12 @@ impl GARC {
         let fato = FATO::import(reader)?;
         let fatb = FATB::import(reader)?;
         let fimb = FIMB::import(reader)?;
-        Ok(GARC { header, fato, fatb, fimb })
+        Ok(GARC {
+            header,
+            fato,
+            fatb,
+            fimb,
+        })
     }
 
     /// Exports an entire GARC file from memory
@@ -44,6 +51,34 @@ impl GARC {
         self.fato.export(writer)?;
         self.fatb.export(writer)?;
         self.fimb.export(writer)?;
+        Ok(())
+    }
+
+    /// Extract a file from its index (GARC files do not have any filenames)
+    pub fn extract<R: Read + Seek, W: Read + Write + Seek>(
+        &self,
+        reader: &mut R,
+        writer: &mut W,
+        file_index: usize,
+    ) -> Result<()> {
+        // Check if the number of files is the same in FATO and FATB sections
+        if u32::from(self.fato.nb_entries) != self.fatb.nb_entries {
+            return Err(GARCError::NbEntriesMismatch(
+                self.fato.nb_entries,
+                self.fatb.nb_entries,
+            ));
+        }
+        // Get the FATB entry
+        let fatb_entry = match self.fatb.entries.get(file_index) {
+            Some(o) => o,
+            None => return Err(GARCError::NoSuchIndex(file_index)),
+        };
+        // Seek to the compressed data
+        reader.seek(SeekFrom::Start(
+            u64::from(self.header.data_offset) + u64::from(fatb_entry.start_offset),
+        ))?;
+        // Decompress the file
+        // decompress(reader, writer, decompressed_size)?;
         Ok(())
     }
 }

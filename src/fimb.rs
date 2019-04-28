@@ -1,6 +1,6 @@
-use std::io::{Read, Write};
 use crate::Result;
-use ez_io::{ReadE, WriteE, MagicNumberCheck};
+use ez_io::{MagicNumberCheck, ReadE, WriteE};
+use std::io::{Read, Write};
 
 pub struct FIMB {
     pub fimb_size: u32,
@@ -12,7 +12,10 @@ impl FIMB {
         reader.check_magic_number(&[b'B', b'M', b'I', b'F'])?;
         let fimb_size = reader.read_le_to_u32()?;
         let data_size = reader.read_le_to_u32()?;
-        Ok(FIMB {fimb_size, data_size})
+        Ok(FIMB {
+            fimb_size,
+            data_size,
+        })
     }
     pub fn export<W: Write>(&self, writer: &mut W) -> Result<()> {
         writer.write_all(&[b'B', b'M', b'I', b'F'])?;

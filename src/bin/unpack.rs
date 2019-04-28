@@ -2,10 +2,10 @@ extern crate clap;
 extern crate garc;
 
 use clap::{App, Arg};
-use std::fs::{create_dir_all, File};
-use std::path::Path;
-use std::io::BufReader;
 use garc::GARC;
+use std::fs::{create_dir_all, File};
+use std::io::BufReader;
+use std::path::Path;
 
 fn main() {
     let matches = App::new("GARC Unpacker")
@@ -23,7 +23,8 @@ fn main() {
                 .help("Output Folder")
                 .required(true)
                 .index(2),
-        ).get_matches();
+        )
+        .get_matches();
 
     let input_str = matches.value_of("IN").unwrap();
     let output_str = matches.value_of("OUT").unwrap();
