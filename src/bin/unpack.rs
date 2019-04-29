@@ -3,7 +3,7 @@ extern crate garc;
 
 use clap::{App, Arg};
 use garc::GARC;
-use std::fs::{create_dir_all, File};
+use std::fs::{create_dir_all, File, OpenOptions};
 use std::io::BufReader;
 use std::path::Path;
 
@@ -44,7 +44,8 @@ fn main() {
     println!("Extracting {} files", nb_files);
 
     for i in 0..nb_files {
-        let file_writer = &mut File::create(output_path.join(format!("dec_{}.bin", i))).unwrap();
+        // Need to open with OpenOptions beceause the create function in File does not allow reading by default
+        let file_writer = &mut OpenOptions::new().read(true).write(true).create(true).open(output_path.join(format!("dec_{}.bin", i))).unwrap();
         garc.extract(garc_reader, file_writer, i as usize).unwrap();
     }
 }
