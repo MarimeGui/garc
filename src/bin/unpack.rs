@@ -3,8 +3,8 @@ extern crate garc;
 
 use clap::{App, Arg};
 use garc::GARC;
-use std::fs::{create_dir_all, File, OpenOptions};
-use std::io::BufReader;
+use std::fs::{create_dir_all, File};
+use std::io::{BufReader, Cursor, Write};
 use std::path::Path;
 
 fn main() {
@@ -46,13 +46,10 @@ fn main() {
     let nb_chars = nb_files.to_string().chars().count();
 
     for i in 0..nb_files {
-        // Need to open with OpenOptions because the create function in File does not allow reading by default
-        let file_writer = &mut OpenOptions::new()
-            .read(true)
-            .write(true)
-            .create(true)
-            .open(output_path.join(format!("dec_{:01$}.bin", i, nb_chars)))
-            .unwrap();
-        garc.extract(garc_reader, file_writer, i as usize).unwrap();
+        let file_writer = &mut File::create(format!("dec_{:01$}.bin", i, nb_chars)).unwrap();
+        let v: Vec<u8> = Vec::new();
+        let mut int_writer = Cursor::new(v);
+        garc.extract(garc_reader, &mut int_writer, i as usize).unwrap();
+        file_writer.write_all(&int_writer.into_inner()).unwrap();
     }
 }
