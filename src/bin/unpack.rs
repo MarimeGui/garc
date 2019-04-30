@@ -43,9 +43,11 @@ fn main() {
     let nb_files = garc.get_nb_files().unwrap();
     println!("Extracting {} files", nb_files);
 
+    let nb_chars = nb_files.to_string().chars().count();
+
     for i in 0..nb_files {
-        // Need to open with OpenOptions beceause the create function in File does not allow reading by default
-        let file_writer = &mut OpenOptions::new().read(true).write(true).create(true).open(output_path.join(format!("dec_{}.bin", i))).unwrap();
+        // Need to open with OpenOptions because the create function in File does not allow reading by default
+        let file_writer = &mut OpenOptions::new().read(true).write(true).create(true).open(output_path.join(format!("dec_{:01$}.bin", i, nb_chars))).unwrap();
         garc.extract(garc_reader, file_writer, i as usize).unwrap();
     }
 }
