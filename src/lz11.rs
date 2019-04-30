@@ -31,7 +31,7 @@ pub fn decompress<R: Read, W: Read + Write + Seek>(
                 }
                 true => {
                     let byte1: u32 = u32::from(reader.read_to_u8()?);
-                    let byte2: u32 = u32::from(reader.read_to_u8()?);;
+                    let byte2: u32 = u32::from(reader.read_to_u8()?);
                     let byte3: u32;
                     let byte4: u32;
 
