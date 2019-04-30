@@ -47,7 +47,12 @@ fn main() {
 
     for i in 0..nb_files {
         // Need to open with OpenOptions because the create function in File does not allow reading by default
-        let file_writer = &mut OpenOptions::new().read(true).write(true).create(true).open(output_path.join(format!("dec_{:01$}.bin", i, nb_chars))).unwrap();
+        let file_writer = &mut OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .open(output_path.join(format!("dec_{:01$}.bin", i, nb_chars)))
+            .unwrap();
         garc.extract(garc_reader, file_writer, i as usize).unwrap();
     }
 }

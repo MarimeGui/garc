@@ -43,7 +43,8 @@ pub fn decompress<R: Read, W: Read + Write + Seek>(
                         count += u32::from(b) >> 4;
                         count += 0x11;
                     } else if indicator == 1 {
-                        count = ((u32::from(b) & 0xF) << 12) | (u32::from(reader.read_to_u8()?) << 4);
+                        count =
+                            ((u32::from(b) & 0xF) << 12) | (u32::from(reader.read_to_u8()?) << 4);
                         b = reader.read_to_u8()?;
                         count += u32::from(b) >> 4;
                         count += 0x111;
@@ -52,7 +53,8 @@ pub fn decompress<R: Read, W: Read + Write + Seek>(
                         count += 1;
                     }
 
-                    let disp: u32 = (((u32::from(b) & 0xF) << 8) | u32::from(reader.read_to_u8()?)) + 1;  // OR or addition ???
+                    let disp: u32 =
+                        (((u32::from(b) & 0xF) << 8) | u32::from(reader.read_to_u8()?)) + 1; // OR or addition ???
 
                     writer.seek(SeekFrom::Current(-i64::from(disp)))?;
                     let to_write = writer.read_to_u8()?;
