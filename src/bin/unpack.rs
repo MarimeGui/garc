@@ -12,7 +12,12 @@ fn main() {
         .version("0.1")
         .author("MarimeGui <lepro.guillaume@gmail.com>")
         .about("Extracts GARC files found in 3DS Titles like Pokémon games")
-        .arg(Arg::with_name("stats").short("s").help("Prints information about the compressed file"))
+        .arg(
+            Arg::with_name("stats")
+                .short("s")
+                .long("stats")
+                .help("Prints information about the compressed file"),
+        )
         .arg(
             Arg::with_name("IN")
                 .help("Input GARC file")
