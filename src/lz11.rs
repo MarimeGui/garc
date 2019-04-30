@@ -1,7 +1,6 @@
-use crate::error::GARCError;
 use crate::Result;
-use ez_io::ReadE;
-use std::io::{ErrorKind as IOErrorKind, Read, Seek, SeekFrom, Write};
+use ez_io::{ReadE, WriteE};
+use std::io::{Read, Seek, SeekFrom, Write};
 
 fn bits(b: u8) -> [bool; 8] {
     [
@@ -16,14 +15,13 @@ fn bits(b: u8) -> [bool; 8] {
     ]
 }
 
-// Straight from https://github.com/magical/nlzss/blob/f27414f373eab53bfe3c1a819c40eb800323e690/lzss3.py#L72
+// Not so straight from https://github.com/magical/nlzss/blob/f27414f373eab53bfe3c1a819c40eb800323e690/lzss3.py#L72
 pub fn decompress<R: Read, W: Read + Write + Seek>(
     reader: &mut R,
     writer: &mut W,
     decompressed_size: usize,
 ) -> Result<()> {
     let mut bytes_written = 0usize;
-    let mut last = 0u8;
     while bytes_written < decompressed_size {
         for flag in bits(reader.read_to_u8()?).iter() {
             match flag {
@@ -58,26 +56,14 @@ pub fn decompress<R: Read, W: Read + Write + Seek>(
                         }
                     }
 
-                    let mut to_write_vec = Vec::with_capacity(count as usize);
-
-                    let write_head = writer.seek(SeekFrom::Current(0))?;
-                    writer.seek(SeekFrom::Current(-i64::from(disp)))?;
                     for _ in 0..count {
-                        to_write_vec.push(match writer.read_to_u8() {
-                            Ok(b) => {
-                                last = b;
-                                b
-                            }
-                            Err(e) => match e.kind() {
-                                IOErrorKind::UnexpectedEof => last,
-                                _ => return Err(GARCError::from(e)),
-                            },
-                        });
+                        let write_head = writer.seek(SeekFrom::Current(0))?;
+                        writer.seek(SeekFrom::Current(-i64::from(disp)))?;
+                        let to_copy = writer.read_to_u8()?;
+                        writer.seek(SeekFrom::Start(write_head))?;
+                        writer.write_to_u8(to_copy)?;
+                        bytes_written += 1;
                     }
-                    writer.seek(SeekFrom::Start(write_head))?;
-
-                    writer.write_all(&to_write_vec)?;
-                    bytes_written += to_write_vec.len();
                 }
             }
             if decompressed_size <= bytes_written {
