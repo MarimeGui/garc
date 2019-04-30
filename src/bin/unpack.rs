@@ -41,7 +41,6 @@ fn main() {
     let garc = GARC::import(garc_reader).unwrap();
 
     let nb_files = garc.get_nb_files().unwrap();
-    println!("Extracting {} files", nb_files);
 
     let nb_chars = nb_files.to_string().chars().count();
 
