@@ -22,48 +22,47 @@ pub fn decompress<R: Read, W: Read + Write + Seek>(
     decompressed_size: usize,
 ) -> Result<()> {
     let mut bytes_written = 0usize;
-    let mut b;
     while bytes_written < decompressed_size {
-        b = reader.read_to_u8()?;
-        for flag in bits(b).iter() {
+        for flag in bits(reader.read_to_u8()?).iter() {
             match flag {
                 false => {
                     writer.write_all(&[reader.read_to_u8()?])?;
                     bytes_written += 1;
                 }
                 true => {
-                    b = reader.read_to_u8()?;
-                    let indicator = b >> 4;
+                    let byte1: u32 = u32::from(reader.read_to_u8()?);
+                    let byte2: u32 = u32::from(reader.read_to_u8()?);;
+                    let byte3: u32;
+                    let byte4: u32;
 
-                    let mut count: u32;
+                    let count: u32;
+                    let disp: u32;
 
-                    if indicator == 0 {
-                        count = u32::from(b) << 4;
-                        b = reader.read_to_u8()?;
-                        count += u32::from(b) >> 4;
-                        count += 0x11;
-                    } else if indicator == 1 {
-                        count =
-                            ((u32::from(b) & 0xF) << 12) | (u32::from(reader.read_to_u8()?) << 4);
-                        b = reader.read_to_u8()?;
-                        count += u32::from(b) >> 4;
-                        count += 0x111;
-                    } else {
-                        count = u32::from(indicator);
-                        count += 1;
+                    match byte1 >> 4 {
+                        0 => {
+                            byte3 = u32::from(reader.read_to_u8()?);
+                            count = (((byte1 & 0x0F) << 4) | (byte2 >> 4)) + 0x11;
+                            disp = (((byte2 & 0x0F) << 8) | byte3) + 0x1;
+                        }
+                        1 => {
+                            byte3 = u32::from(reader.read_to_u8()?);
+                            byte4 = u32::from(reader.read_to_u8()?);
+                            count = (((byte1 & 0x0F) << 12) | (byte2 << 4) | (byte3 >> 4)) + 0x111;
+                            disp = (((byte3 & 0x0F) << 8) | byte4) + 0x1;
+                        }
+                        _ => {
+                            count = ((byte1 & 0xF0) >> 4) + 0x1;
+                            disp = (((byte1 & 0x0F) << 8) | byte2) + 0x1;
+                        }
                     }
-
-                    let disp: u32 =
-                        (((u32::from(b) & 0xF) << 8) | u32::from(reader.read_to_u8()?)) + 1; // OR or addition ???
-
-                    writer.seek(SeekFrom::Current(-i64::from(disp)))?;
-                    let to_write = writer.read_to_u8()?;
-                    writer.seek(SeekFrom::Current(i64::from(disp) - 1))?;
 
                     let mut to_write_vec = Vec::with_capacity(count as usize);
+
+                    writer.seek(SeekFrom::Current(-i64::from(disp)))?;
                     for _ in 0..count {
-                        to_write_vec.push(to_write);
+                        to_write_vec.push(writer.read_to_u8()?);
                     }
+                    writer.seek(SeekFrom::Current(i64::from(disp) - i64::from(count)))?;
 
                     writer.write_all(&to_write_vec)?;
                     bytes_written += to_write_vec.len();
