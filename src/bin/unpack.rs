@@ -45,10 +45,12 @@ fn main() {
     let nb_chars = nb_files.to_string().chars().count();
 
     for i in 0..nb_files {
-        let file_writer = &mut File::create(format!("dec_{:01$}.bin", i, nb_chars)).unwrap();
+        let file_writer =
+            &mut File::create(output_path.join(format!("dec_{:01$}.bin", i, nb_chars))).unwrap();
         let v: Vec<u8> = Vec::new();
         let mut int_writer = Cursor::new(v);
-        garc.extract(garc_reader, &mut int_writer, i as usize).unwrap();
+        garc.extract(garc_reader, &mut int_writer, i as usize)
+            .unwrap();
         file_writer.write_all(&int_writer.into_inner()).unwrap();
     }
 }
