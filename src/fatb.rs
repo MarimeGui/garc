@@ -12,7 +12,7 @@ pub struct FATB {
 }
 
 impl FATB {
-    /// Reads the FATO data, should be seeked after the FATO section
+    /// Reads the FATB data, should be seeked after the FATB section
     pub fn import<R: Read>(reader: &mut R) -> Result<FATB> {
         reader.check_magic_number(&[b'B', b'T', b'A', b'F'])?;
         let fatb_size = reader.read_le_to_u32()?;
@@ -28,7 +28,7 @@ impl FATB {
         })
     }
 
-    /// Writes the FATO data, should be seeked after the FATO section
+    /// Writes the FATB data, should be seeked after the FATB section
     pub fn export<W: Write>(&self, writer: &mut W) -> Result<()> {
         writer.write_all(&[b'B', b'T', b'A', b'F'])?;
         writer.write_le_to_u32(self.fatb_size)?;
