@@ -15,7 +15,7 @@ use crate::fato::FATO;
 use crate::fimb::FIMB;
 use crate::header::Header;
 use crate::lz11::decompress;
-use ez_io::MagicNumberCheck;
+use ez_io::{MagicNumberCheck, ReadE};
 use std::io::{Read, Seek, SeekFrom, Write};
 
 type Result<T> = ::std::result::Result<T, GARCError>;
@@ -71,21 +71,20 @@ impl GARC {
         reader.seek(SeekFrom::Start(
             u64::from(self.header.data_offset) + u64::from(fatb_entry.start_offset),
         ))?;
-        if fatb_entry.is_compressed() {
+        // Get first byte to guess compression, to me it just feels like a ugly hack but I could not find any other way
+        let first_byte = reader.read_to_u8()?;
+        reader.seek(SeekFrom::Current(-1))?;
+        if first_byte == 0x11 {
             // Get compressed header
             let c_header = CompressedHeader::import(reader)?;
-            // Check compression type
-            if c_header.get_compression() != 0x11 {
-                return Err(GARCError::UnknownCompressionAlgorithm(
-                    c_header.get_compression(),
-                ));
-            }
             // Decompress the file
             decompress(reader, writer, c_header.get_decompressed_size() as usize)?;
-        } else {
+        } else if first_byte >= 0x41 {
             let mut buf = vec![0u8; fatb_entry.length as usize]; // Lossy
             reader.read_exact(&mut buf)?;
             writer.write_all(&buf)?;
+        } else {
+            return Err(GARCError::UnknownCompressionAlgorithm(first_byte));
         }
 
         Ok(())

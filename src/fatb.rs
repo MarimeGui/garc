@@ -69,9 +69,4 @@ impl Entry {
         writer.write_le_to_u32(self.length)?;
         Ok(())
     }
-
-    /// Naive way of checking if this file is compressed by comparing lengths. Should work most of the times
-    pub fn is_compressed(&self) -> bool {
-        (self.end_offset - self.start_offset) != self.length
-    }
 }
